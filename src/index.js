@@ -17,6 +17,7 @@ const toBtnTop = document.querySelector('.btn-to-top')
 const loading = document.querySelector('.loading')
 const inputRef = document.querySelector(`[name="searchQuery"]`)
 
+
 let simpleLightBox = null
 let page = 1
 let perPage = 40
@@ -76,7 +77,7 @@ function showLoading() {
     }
     loading.classList.add('show')
     inputRef.setAttribute("disabled","disabled")
-	setTimeout (onLoadMoreBtn, 2000)
+	setTimeout (onLoadMoreBtn, 500)
 }
 
 function onLoadMoreBtn() {
@@ -85,15 +86,17 @@ function onLoadMoreBtn() {
         loadMoreBtn.classList.add('is-hidden')
         inputRef.removeAttribute("disabled")
         loading.classList.remove('show')
-        Notify.warning('We are sorry, but you have reached the end of search results.')
+        Notify.warning("Something bad happened. Check the browser console")
         page=0
         return
+       
     }
     load()
 }
 
-function load(){
-    fetchSearch(q, page, perPage)
+
+ async function load(){
+    await fetchSearch(q, page, perPage)
     .then(responseData => {
         if(page === 1){
             galleryRef.innerHTML = ''
@@ -115,14 +118,15 @@ function load(){
         }
     })
     .catch(error => {
-        Notify.failure("Something bad happened. Check the browser console")
+        loadMoreBtn.classList.add('is-hidden')
+        Notify.failure('We are sorry, but you have reached the end of search results.')
         console.warn(error)
     })
     .finally(() => {
         setTimeout(() => {
             inputRef.removeAttribute("disabled")
             loading.classList.remove('show')
-        }, 500)
+        }, 0)
     })
 }
 
