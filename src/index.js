@@ -95,8 +95,8 @@ function onLoadMoreBtn() {
 }
 
 
- async function load(){
-    await fetchSearch(q, page, perPage)
+ function load(){
+    fetchSearch(q, page, perPage)
     .then(responseData => {
         if(page === 1){
             galleryRef.innerHTML = ''
@@ -123,10 +123,9 @@ function onLoadMoreBtn() {
         console.warn(error)
     })
     .finally(() => {
-        setTimeout(() => {
             inputRef.removeAttribute("disabled")
             loading.classList.remove('show')
-        }, 0)
+        
     })
 }
 
