@@ -27,6 +27,51 @@ let totalPages = 0
 window.addEventListener('scroll', onScroll)
 toBtnTop.addEventListener('click', onToTopBtn)
 searchFormRef.addEventListener("submit", onSubmit)
+loadMoreBtn.classList.add('is-hidden')
+
+const SLBflow = () => {
+    if(!simpleLightBox){
+        simpleLightBox = new SimpleLightbox('.gallery a')
+    } else {
+        simpleLightBox.refresh()
+    }
+    
+}
+
+const load2 = async () => {
+    try {
+        const responseData = await fetchSearch(q, page, perPage);
+
+        if(page === 1){
+            galleryRef.innerHTML = ''
+        }
+
+        if (responseData.data && (!responseData.data.total || !responseData.data.hits.length)){
+            Notify.failure("Sorry, there are no images matching your search query. Please try again.")
+            return 
+        }
+
+        totalPages = Math.ceil(responseData.data.total / perPage);
+
+        if(page === 1){
+            Notify.success(`Hooray! We found ${responseData.data.total} images.`)
+        }
+
+        renderGallery(responseData.data.hits);
+        SLBflow();
+
+     
+    } catch (error) {
+        loadMoreBtn.classList.add('is-hidden')
+        Notify.failure('We are sorry, but you have reached the end of search results.')
+        console.warn(error)
+        
+    }
+    finally{
+        inputRef.removeAttribute("disabled")
+            loading.classList.remove('show')
+    }
+}
 
 function onToTopBtn() {
     if (window.pageYOffset > 0) {
@@ -49,7 +94,7 @@ function onSubmit(ev){
     inputRef.setAttribute("disabled","disabled")
     page = 1
     totalPages = 0
-    load()
+    load2()
 }
 
 function onScroll() {
@@ -91,43 +136,10 @@ function onLoadMoreBtn() {
         return
        
     }
-    load()
+    load2()
 }
 
 
- function load(){
-    fetchSearch(q, page, perPage)
-    .then(responseData => {
-        if(page === 1){
-            galleryRef.innerHTML = ''
-        }
-        if (responseData.data && (!responseData.data.total || !responseData.data.hits.length)){
-            Notify.failure("Sorry, there are no images matching your search query. Please try again.")
-            return 
-        }
-        totalPages = Math.ceil(responseData.data.total / perPage)
-        if(page === 1){
-            Notify.success(`Hooray! We found ${responseData.data.total} images.`)
-        }
-        renderGallery(responseData.data.hits)
-        loadMoreBtn.classList.toggle('is-hidden', !(responseData.data.total > perPage))
-        if(!simpleLightBox){
-            simpleLightBox = new SimpleLightbox('.gallery a')
-        } else {
-            simpleLightBox.refresh()
-        }
-    })
-    .catch(error => {
-        loadMoreBtn.classList.add('is-hidden')
-        Notify.failure('We are sorry, but you have reached the end of search results.')
-        console.warn(error)
-    })
-    .finally(() => {
-            inputRef.removeAttribute("disabled")
-            loading.classList.remove('show')
-        
-    })
-}
 
 function renderGallery(images) {
     const markup = images.map(image => {
